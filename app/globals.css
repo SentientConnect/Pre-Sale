@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: dark;
+  --background: #030303;
+  --foreground: #f5f3ef;
+}
+
+* { box-sizing: border-box; }
+html { background: #000; }
+body { margin: 0; background: #030303; color: var(--foreground); font-family: Arial, Helvetica, sans-serif; overflow-x: hidden; }
+::selection { background: rgba(213,173,83,.35); color: white; }
+
+.font-display { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; }
+.text-gold-gradient {
+  background: linear-gradient(135deg,#fff4bc 0%,#e8c869 32%,#b77719 69%,#f2d783 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
