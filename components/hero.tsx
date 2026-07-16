@@ -28,7 +28,7 @@ export function Hero() {
     offset: ['start start', 'end start'],
   })
 
-  const y = useTransform(
+  const imageY = useTransform(
     scrollYProgress,
     [0, 1],
     [0, reduceMotion ? 0 : 110],
@@ -40,11 +40,13 @@ export function Hero() {
       ref={ref}
       className="relative min-h-screen overflow-hidden pb-20 pt-32 md:pt-40"
     >
+      {/* Main background */}
       <div
         aria-hidden="true"
         className="absolute inset-0 -z-30 bg-[radial-gradient(circle_at_78%_30%,rgba(206,160,55,.16),transparent_35%),radial-gradient(circle_at_12%_70%,rgba(123,87,20,.13),transparent_35%),linear-gradient(180deg,#020202_0%,#080704_50%,#000_100%)]"
       />
 
+      {/* Subtle grid */}
       <div
         aria-hidden="true"
         className="absolute inset-0 -z-20 opacity-[0.12] [background-image:linear-gradient(rgba(213,173,83,.2)_1px,transparent_1px),linear-gradient(90deg,rgba(213,173,83,.2)_1px,transparent_1px)] [background-size:60px_60px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]"
@@ -53,6 +55,7 @@ export function Hero() {
       <GoldParticles className="pointer-events-none absolute inset-0 -z-10" />
 
       <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:px-8">
+        {/* Left content */}
         <div>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -148,54 +151,15 @@ export function Hero() {
           </p>
         </div>
 
+        {/* Glasses product display */}
         <div className="relative min-h-[430px] lg:min-h-[620px]">
-          <motion.div
-            style={{ y }}
-            className="absolute inset-0 z-10 flex items-center justify-center"
-          >
-            <div
-              aria-hidden="true"
-              className="absolute h-[68%] w-[82%] rounded-full bg-[#bb7d1d]/10 blur-[110px]"
-            />
+          {/* Gold glow */}
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 top-1/2 z-0 h-[65%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#bb7d1d]/10 blur-[110px]"
+          />
 
-            <motion.div
-              animate={
-                reduceMotion
-                  ? undefined
-                  : {
-                      y: [0, -12, 0],
-                      rotate: [0, 0.35, 0],
-                    }
-              }
-              transition={{
-                duration: 7,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              className="relative z-20 w-full max-w-[760px]"
-            >
-              <div
-                className="relative w-full"
-                style={{
-                  WebkitMaskImage:
-                    'radial-gradient(ellipse 72% 68% at center, black 54%, rgba(0,0,0,.95) 67%, rgba(0,0,0,.45) 82%, transparent 100%)',
-                  maskImage:
-                    'radial-gradient(ellipse 72% 68% at center, black 54%, rgba(0,0,0,.95) 67%, rgba(0,0,0,.45) 82%, transparent 100%)',
-                }}
-              >
-                <Image
-                  src="/Glass_edit.png"
-                  alt="SentientOS AR glasses with the official phoenix logo"
-                  width={1536}
-                  height={1024}
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 55vw"
-                  className="h-auto w-full select-none object-contain drop-shadow-[0_35px_55px_rgba(0,0,0,0.75)]"
-                />
-              </div>
-            </motion.div>
-          </motion.div>
-
+          {/* Rotating circles */}
           <motion.div
             aria-hidden="true"
             animate={reduceMotion ? undefined : { rotate: 360 }}
@@ -204,7 +168,7 @@ export function Hero() {
               repeat: Infinity,
               ease: 'linear',
             }}
-            className="absolute left-1/2 top-1/2 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d5ad53]/15"
+            className="absolute left-1/2 top-1/2 z-0 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d5ad53]/15"
           />
 
           <motion.div
@@ -215,9 +179,52 @@ export function Hero() {
               repeat: Infinity,
               ease: 'linear',
             }}
-            className="absolute left-1/2 top-1/2 h-[88%] w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#d5ad53]/10"
+            className="absolute left-1/2 top-1/2 z-0 h-[88%] w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#d5ad53]/10"
           />
 
+          {/* Glasses image */}
+          <motion.div
+            style={{ y: imageY }}
+            className="absolute inset-0 z-20 flex items-center justify-center"
+          >
+            <motion.div
+              animate={
+                reduceMotion
+                  ? undefined
+                  : {
+                      y: [0, -12, 0],
+                    }
+              }
+              transition={{
+                duration: 7,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              className="relative w-[115%] max-w-[820px] lg:w-[125%]"
+            >
+              <div
+                className="relative w-full"
+                style={{
+                  WebkitMaskImage:
+                    'radial-gradient(ellipse 76% 72% at center, black 48%, rgba(0,0,0,.98) 63%, rgba(0,0,0,.72) 76%, transparent 100%)',
+                  maskImage:
+                    'radial-gradient(ellipse 76% 72% at center, black 48%, rgba(0,0,0,.98) 63%, rgba(0,0,0,.72) 76%, transparent 100%)',
+                }}
+              >
+                <Image
+                  src="/Glasses_edit.png"
+                  alt="SentientOS AR glasses with the official phoenix logo"
+                  width={1536}
+                  height={1024}
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  className="h-auto w-full select-none object-contain drop-shadow-[0_35px_55px_rgba(0,0,0,0.8)]"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Human layer card */}
           <div className="absolute bottom-4 right-2 z-30 rounded-2xl border border-[#d5ad53]/20 bg-black/55 px-4 py-3 backdrop-blur-md">
             <p className="text-[0.62rem] uppercase tracking-[0.22em] text-[#d5ad53]">
               Human Layer
