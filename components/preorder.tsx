@@ -1,0 +1,42 @@
+'use client'
+
+import { FormEvent, useState } from 'react'
+import { Check, LockKeyhole } from 'lucide-react'
+import { track } from '@/lib/analytics'
+
+export function Preorder() {
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'ready' | 'error'>('idle')
+  const [message, setMessage] = useState('')
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setStatus('submitting')
+    track('checkout_started')
+    const form = new FormData(event.currentTarget)
+    const payload = Object.fromEntries(form.entries())
+
+    try {
+      const response = await fetch('/api/reserve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Unable to continue')
+      if (data.checkoutUrl) {
+        setStatus('ready')
+        setMessage('Opening secure checkout…')
+        window.location.href = data.checkoutUrl
+        return
+      }
+      setStatus('ready')
+      setMessage('Your information was captured. Add NEXT_PUBLIC_CHECKOUT_URL in Vercel to connect the live $25 payment page.')
+    } catch (error) {
+      setStatus('error')
+      setMessage(error instanceof Error ? error.message : 'Unable to continue. Please try again.')
+    }
+  }
+
+  return (
+    <section id="preorder" className="relative overflow-hidden border-y border-[#d5ad53]/15 py-24 md:py-32"><div aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,rgba(213,173,83,.13),transparent_50%),#030302]"/><div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"><div className="grid overflow-hidden rounded-[2rem] border border-[#d5ad53]/25 bg-black/80 shadow-[0_40px_120px_rgba(0,0,0,.7)] lg:grid-cols-[.9fr_1.1fr]">
+      <div className="border-b border-white/[0.08] p-7 sm:p-10 lg:border-b-0 lg:border-r"><p className="text-xs font-semibold uppercase tracking-[.26em] text-[#d5ad53]">Founding Pre-Order Access</p><h2 className="mt-5 font-display text-4xl font-semibold leading-tight text-white sm:text-5xl">Become a Founding SentientOS™ User</h2><div className="mt-8 flex items-end gap-3"><span className="font-display text-7xl font-semibold text-gold-gradient">$25</span><span className="pb-2 text-sm uppercase tracking-[.18em] text-white/40">today</span></div><ul className="mt-8 space-y-4">{['Reserve priority pre-order access','3 months of AURA Genesis™ free after activation','$19.99/month after the free period','25% off the final retail price','Product development and launch updates'].map(item=><li key={item} className="flex gap-3 text-sm text-white/65"><Check className="mt-0.5 h-4 w-4 shrink-0 text-[#d5ad53]"/>{item}</li>)}</ul><div className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4 text-xs leading-6 text-white/40">The anticipated retail price is approximately $399 and is subject to change. The $25 payment is governed by the final pre-order terms shown at checkout.</div></div>
+      <form onSubmit={submit} className="p-7 sm:p-10"><div className="flex items-center gap-2 text-sm text-white/55"><LockKeyhole className="h-4 w-4 text-[#d5ad53]"/>Secure checkout handoff</div><div className="mt-7 grid gap-5 sm:grid-cols-2"><label className="text-sm text-white/55">First name<input required name="firstName" autoComplete="given-name" className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white outline-none transition placeholder:text-white/20 focus:border-[#d5ad53]/60" /></label><label className="text-sm text-white/55">Last name<input required name="lastName" autoComplete="family-name" className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white outline-none transition focus:border-[#d5ad53]/60" /></label><label className="text-sm text-white/55 sm:col-span-2">Email<input required type="email" name="email" autoComplete="email" className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white outline-none transition focus:border-[#d5ad53]/60" /></label><label className="text-sm text-white/55 sm:col-span-2">Mobile phone<input required type="tel" name="phone" autoComplete="tel" className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white outline-none transition focus:border-[#d5ad53]/60" /></label></div><label className="mt-5 flex items-start gap-3 text-xs leading-5 text-white/40"><input required type="checkbox" name="terms" value="accepted" className="mt-1 accent-[#d5ad53]"/>I agree to the pre-order terms and consent to receive reservation and product-launch updates.</label><button disabled={status==='submitting'} type="submit" className="mt-7 inline-flex min-h-14 w-full items-center justify-center rounded-full border border-[#f1d785]/70 bg-[linear-gradient(135deg,#efd27b,#b87a1c)] px-6 font-bold text-black transition hover:-translate-y-0.5 disabled:opacity-60">{status==='submitting'?'Preparing checkout…':'Reserve My Glasses for $25'}</button><p className="mt-4 text-center text-xs text-white/35">One-time holding deposit · Subscription begins after the included free period and eligible product activation</p>{message&&<div className={`mt-5 rounded-xl border p-4 text-sm leading-6 ${status==='error'?'border-red-400/20 bg-red-400/5 text-red-200':'border-[#d5ad53]/20 bg-[#d5ad53]/5 text-white/60'}`}>{message}</div>}</form>
+    </div></div></section>
+  )
+}
