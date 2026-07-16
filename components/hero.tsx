@@ -145,7 +145,6 @@ export function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#d5ad53]/60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d5ad53]" />
             </span>
-
             Founding pre-order access is limited
           </p>
         </div>
@@ -153,7 +152,7 @@ export function Hero() {
         <div className="relative min-h-[430px] lg:min-h-[620px]">
           <div
             aria-hidden="true"
-            className="absolute left-1/2 top-1/2 z-0 h-[68%] w-[82%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#bb7d1d]/10 blur-[120px]"
+            className="absolute left-1/2 top-1/2 z-0 h-[70%] w-[82%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#bb7d1d]/12 blur-[130px]"
           />
 
           <motion.div
@@ -195,41 +194,43 @@ export function Hero() {
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
-              className="relative w-[118%] max-w-[860px] lg:w-[130%]"
+              className="relative w-[125%] max-w-[980px] lg:w-[138%]"
             >
-              <div
-                className="relative aspect-[3/2] w-full overflow-hidden"
-                style={{
-                  WebkitMaskImage:
-                    'radial-gradient(ellipse 76% 70% at 56% 54%, black 45%, rgba(0,0,0,.98) 60%, rgba(0,0,0,.72) 74%, rgba(0,0,0,.25) 87%, transparent 100%)',
-                  maskImage:
-                    'radial-gradient(ellipse 76% 70% at 56% 54%, black 45%, rgba(0,0,0,.98) 60%, rgba(0,0,0,.72) 74%, rgba(0,0,0,.25) 87%, transparent 100%)',
-                }}
-              >
-                <Image
-                  src="/Glasses_edit.png"
-                  alt="SentientOS AR glasses with the official phoenix logo"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 60vw"
-                  className="select-none object-cover object-[56%_53%] brightness-[0.9] contrast-[1.1]"
-                />
+              <div className="relative aspect-[4/3] w-full overflow-hidden">
+                <div
+                  className="absolute inset-0 z-0"
+                  style={{
+                    WebkitMaskImage:
+                      'radial-gradient(ellipse 72% 66% at 56% 53%, black 42%, rgba(0,0,0,.98) 57%, rgba(0,0,0,.84) 67%, rgba(0,0,0,.45) 79%, transparent 100%)',
+                    maskImage:
+                      'radial-gradient(ellipse 72% 66% at 56% 53%, black 42%, rgba(0,0,0,.98) 57%, rgba(0,0,0,.84) 67%, rgba(0,0,0,.45) 79%, transparent 100%)',
+                  }}
+                >
+                  <Image
+                    src="/Glasses_edit.png"
+                    alt="SentientOS AR glasses with the official phoenix logo"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    className="select-none object-cover object-center scale-[1.22] brightness-[0.9] contrast-[1.08]"
+                  />
+                </div>
 
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-0"
+                  className="pointer-events-none absolute inset-0 z-10"
                   style={{
                     background:
-                      'radial-gradient(circle at 4% 6%, #020202 0%, #020202 11%, rgba(2,2,2,.98) 17%, rgba(2,2,2,.72) 24%, rgba(2,2,2,.25) 33%, transparent 43%)',
+                      'linear-gradient(to right, #020202 0%, rgba(2,2,2,.98) 6%, rgba(2,2,2,.85) 11%, rgba(2,2,2,.45) 18%, transparent 28%, transparent 72%, rgba(2,2,2,.45) 82%, rgba(2,2,2,.85) 89%, rgba(2,2,2,.98) 94%, #020202 100%), linear-gradient(to bottom, #020202 0%, rgba(2,2,2,.96) 7%, rgba(2,2,2,.7) 14%, rgba(2,2,2,.28) 22%, transparent 32%, transparent 72%, rgba(2,2,2,.32) 82%, rgba(2,2,2,.72) 89%, rgba(2,2,2,.96) 95%, #020202 100%)',
                   }}
                 />
 
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-0"
+                  className="pointer-events-none absolute inset-0 z-20"
                   style={{
                     background:
-                      'linear-gradient(to right, #020202 0%, rgba(2,2,2,.75) 5%, transparent 18%, transparent 84%, rgba(2,2,2,.7) 95%, #020202 100%), linear-gradient(to bottom, #020202 0%, rgba(2,2,2,.55) 7%, transparent 20%, transparent 82%, rgba(2,2,2,.65) 95%, #020202 100%)',
+                      'radial-gradient(circle at 50% 54%, transparent 0%, transparent 42%, rgba(2,2,2,.12) 58%, rgba(2,2,2,.45) 76%, rgba(2,2,2,.82) 92%, #020202 100%)',
                   }}
                 />
               </div>
