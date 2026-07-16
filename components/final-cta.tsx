@@ -1,5 +1,0 @@
-import { ReserveButton } from '@/components/reserve-button'
-
-export function FinalCTA() {
-  return <section className="px-4 pb-24 sm:px-6 md:pb-32"><div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-[#d5ad53]/20 bg-[radial-gradient(circle_at_50%_0%,rgba(213,173,83,.14),transparent_55%),#050504] px-6 py-16 text-center sm:px-10 sm:py-20"><p className="text-xs font-semibold uppercase tracking-[.28em] text-[#d5ad53]">The Next Evolution of Accountability</p><h2 className="mx-auto mt-5 max-w-4xl font-display text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl">You Do Not Need More Information.<span className="block text-gold-gradient">You Need a System That Helps You Act on It.</span></h2><p className="mx-auto mt-6 max-w-2xl text-lg text-white/55">Reserve your place in the symbiotic future of AI and the Human Layer.</p><ReserveButton className="mt-9 min-h-14 px-8 text-base"/><p className="mt-5 text-xs uppercase tracking-[.18em] text-white/35">3 Months Free · 25% Off Final Retail Price · Priority Pre-Order Access</p></div></section>
-}
