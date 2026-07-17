@@ -64,9 +64,12 @@ export async function POST(request: Request) {
       )
     }
 
-    const apiLoginId = process.env.AUTHORIZE_NET_API_LOGIN_ID
+    const apiLoginId =
+      process.env.AUTHORIZE_NET_API_LOGIN_ID
+
     const transactionKey =
       process.env.AUTHORIZE_NET_TRANSACTION_KEY
+
     const environment =
       process.env.AUTHORIZE_NET_ENVIRONMENT?.toLowerCase() ||
       'sandbox'
@@ -134,12 +137,10 @@ export async function POST(request: Request) {
               settingName: 'hostedPaymentReturnOptions',
               settingValue: JSON.stringify({
                 showReceipt: true,
-                url: `${siteUrl}/?payment=success&reference=${encodeURIComponent(
-                  referenceId,
-                )}#preorder`,
+                url: siteUrl,
                 urlText: 'Return to SentientOS',
-                cancelUrl: `${siteUrl}/?payment=cancelled#preorder`,
-                cancelUrlText: 'Cancel',
+                cancelUrl: siteUrl,
+                cancelUrlText: 'Return to SentientOS',
               }),
             },
             {
@@ -160,6 +161,12 @@ export async function POST(request: Request) {
                 cardCodeRequired: true,
                 showCreditCard: true,
                 showBankAccount: false,
+              }),
+            },
+            {
+              settingName: 'hostedPaymentSecurityOptions',
+              settingValue: JSON.stringify({
+                captcha: false,
               }),
             },
             {
@@ -207,7 +214,8 @@ export async function POST(request: Request) {
       cache: 'no-store',
     })
 
-    const rawResponse = await authorizeNetResponse.text()
+    const rawResponse =
+      await authorizeNetResponse.text()
 
     let paymentData: AuthorizeNetResponse
 
@@ -217,7 +225,7 @@ export async function POST(request: Request) {
       ) as AuthorizeNetResponse
     } catch {
       console.error(
-        'Invalid Authorize.net response format:',
+        'Invalid Authorize.net response:',
         rawResponse,
       )
 
@@ -227,10 +235,11 @@ export async function POST(request: Request) {
       )
     }
 
-    const paymentError = paymentData.messages?.message
-      ?.map((item) => item.text)
-      .filter(Boolean)
-      .join('; ')
+    const paymentError =
+      paymentData.messages?.message
+        ?.map((item) => item.text)
+        .filter(Boolean)
+        .join('; ')
 
     if (
       !authorizeNetResponse.ok ||
@@ -246,13 +255,14 @@ export async function POST(request: Request) {
         {
           error:
             paymentError ||
-            'Unable to create the secure payment checkout',
+            'Unable to create secure checkout',
         },
         { status: 502 },
       )
     }
 
-    const webhook = process.env.RESERVATION_WEBHOOK_URL
+    const webhook =
+      process.env.RESERVATION_WEBHOOK_URL
 
     if (webhook) {
       try {
@@ -276,7 +286,10 @@ export async function POST(request: Request) {
           }),
         })
       } catch (error) {
-        console.error('Reservation webhook failed:', error)
+        console.error(
+          'Reservation webhook failed:',
+          error,
+        )
       }
     }
 
