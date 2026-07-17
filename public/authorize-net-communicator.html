@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Authorize.net Communicator</title>
+  </head>
+
+  <body>
+    <script>
+      ;(function () {
+        function sendToCheckout(message) {
+          if (!message) return
+
+          const checkoutWindow =
+            window.parent && window.parent.parent
+
+          const handler =
+            checkoutWindow &&
+            checkoutWindow.CommunicationHandler
+
+          if (
+            handler &&
+            typeof handler.onReceiveCommunication ===
+              'function'
+          ) {
+            handler.onReceiveCommunication({
+              qstr: message,
+              parent: document.referrer,
+            })
+          }
+        }
+
+        function receiveMessage(event) {
+          if (
+            event &&
+            typeof event.data === 'string'
+          ) {
+            sendToCheckout(event.data)
+          }
+        }
+
+        window.addEventListener(
+          'message',
+          receiveMessage,
+          false,
+        )
+
+        if (
+          window.location.hash &&
+          window.location.hash.length > 1
+        ) {
+          sendToCheckout(
+            window.location.hash.substring(1),
+          )
+        }
+      })()
+    </script>
+  </body>
+</html>
