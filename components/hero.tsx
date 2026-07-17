@@ -32,7 +32,7 @@ export function Hero() {
   const imageY = useTransform(
     scrollYProgress,
     [0, 1],
-    [0, reduceMotion ? 0 : 110],
+    [0, reduceMotion ? 0 : 90],
   )
 
   return (
@@ -150,11 +150,6 @@ export function Hero() {
         </div>
 
         <div className="relative min-h-[430px] lg:min-h-[620px]">
-          <div
-            aria-hidden="true"
-            className="absolute left-1/2 top-1/2 z-0 h-[70%] w-[82%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#bb7d1d]/12 blur-[130px]"
-          />
-
           <motion.div
             aria-hidden="true"
             animate={reduceMotion ? undefined : { rotate: 360 }}
@@ -163,7 +158,7 @@ export function Hero() {
               repeat: Infinity,
               ease: 'linear',
             }}
-            className="absolute left-1/2 top-1/2 z-0 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d5ad53]/15"
+            className="absolute left-1/2 top-1/2 z-0 h-[74%] w-[74%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d5ad53]/12"
           />
 
           <motion.div
@@ -174,7 +169,12 @@ export function Hero() {
               repeat: Infinity,
               ease: 'linear',
             }}
-            className="absolute left-1/2 top-1/2 z-0 h-[88%] w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#d5ad53]/10"
+            className="absolute left-1/2 top-1/2 z-0 h-[88%] w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-[#d5ad53]/8"
+          />
+
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_55%_48%,rgba(213,173,83,.14),transparent_28%)]"
           />
 
           <motion.div
@@ -194,44 +194,16 @@ export function Hero() {
                 repeat: Infinity,
                 ease: 'easeInOut',
               }}
-              className="relative w-[125%] max-w-[980px] lg:w-[138%]"
+              className="relative w-[118%] max-w-[1000px] lg:w-[132%]"
             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
-                <div
-                  className="absolute inset-0 z-0"
-                  style={{
-                    WebkitMaskImage:
-                      'radial-gradient(ellipse 72% 66% at 56% 53%, black 42%, rgba(0,0,0,.98) 57%, rgba(0,0,0,.84) 67%, rgba(0,0,0,.45) 79%, transparent 100%)',
-                    maskImage:
-                      'radial-gradient(ellipse 72% 66% at 56% 53%, black 42%, rgba(0,0,0,.98) 57%, rgba(0,0,0,.84) 67%, rgba(0,0,0,.45) 79%, transparent 100%)',
-                  }}
-                >
-                  <Image
-                    src="/Glasses_edit.png"
-                    alt="SentientOS AR glasses with the official phoenix logo"
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 60vw"
-                    className="select-none object-cover object-center scale-[1.22] brightness-[0.9] contrast-[1.08]"
-                  />
-                </div>
-
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 z-10"
-                  style={{
-                    background:
-                      'linear-gradient(to right, #020202 0%, rgba(2,2,2,.98) 6%, rgba(2,2,2,.85) 11%, rgba(2,2,2,.45) 18%, transparent 28%, transparent 72%, rgba(2,2,2,.45) 82%, rgba(2,2,2,.85) 89%, rgba(2,2,2,.98) 94%, #020202 100%), linear-gradient(to bottom, #020202 0%, rgba(2,2,2,.96) 7%, rgba(2,2,2,.7) 14%, rgba(2,2,2,.28) 22%, transparent 32%, transparent 72%, rgba(2,2,2,.32) 82%, rgba(2,2,2,.72) 89%, rgba(2,2,2,.96) 95%, #020202 100%)',
-                  }}
-                />
-
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 z-20"
-                  style={{
-                    background:
-                      'radial-gradient(circle at 50% 54%, transparent 0%, transparent 42%, rgba(2,2,2,.12) 58%, rgba(2,2,2,.45) 76%, rgba(2,2,2,.82) 92%, #020202 100%)',
-                  }}
+              <div className="relative aspect-[16/10] w-full">
+                <Image
+                  src="/Glasses_official.png"
+                  alt="SentientOS AR glasses with the official phoenix logo"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  className="select-none object-contain object-center"
                 />
               </div>
             </motion.div>
