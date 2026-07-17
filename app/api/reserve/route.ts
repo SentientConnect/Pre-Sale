@@ -1,283 +1,239 @@
-import { NextResponse } from 'next/server'
+'use client'
 
-type ReserveRequest = {
-  firstName?: string
-  lastName?: string
-  email?: string
-  phone?: string
-  terms?: string
-}
+import { FormEvent, useState } from 'react'
+import { Check, LockKeyhole } from 'lucide-react'
+import { track } from '@/lib/analytics'
 
-type AuthorizeNetResponse = {
+type CheckoutResponse = {
+  ok?: boolean
   token?: string
-  messages?: {
-    resultCode?: string
-    message?: Array<{
-      code?: string
-      text?: string
-    }>
-  }
+  hostedFormUrl?: string
+  referenceId?: string
+  error?: string
 }
 
-export async function POST(request: Request) {
-  try {
-    const body = (await request.json()) as ReserveRequest
+export function Preorder() {
+  const [status, setStatus] = useState<
+    'idle' | 'submitting' | 'ready' | 'error'
+  >('idle')
 
-    const firstName = String(body.firstName || '').trim()
-    const lastName = String(body.lastName || '').trim()
-    const email = String(body.email || '').trim()
-    const phone = String(body.phone || '').trim()
-    const terms = String(body.terms || '').trim()
+  const [message, setMessage] = useState('')
 
-    if (!firstName) {
-      return NextResponse.json(
-        { error: 'Missing first name' },
-        { status: 400 },
-      )
-    }
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
 
-    if (!lastName) {
-      return NextResponse.json(
-        { error: 'Missing last name' },
-        { status: 400 },
-      )
-    }
+    setStatus('submitting')
+    setMessage('')
+    track('checkout_started')
 
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Missing email' },
-        { status: 400 },
-      )
-    }
-
-    if (!phone) {
-      return NextResponse.json(
-        { error: 'Missing phone' },
-        { status: 400 },
-      )
-    }
-
-    if (terms !== 'accepted') {
-      return NextResponse.json(
-        { error: 'Pre-order terms must be accepted' },
-        { status: 400 },
-      )
-    }
-
-    const apiLoginId = process.env.AUTHORIZE_NET_API_LOGIN_ID
-    const transactionKey = process.env.AUTHORIZE_NET_TRANSACTION_KEY
-    const environment =
-      process.env.AUTHORIZE_NET_ENVIRONMENT?.toLowerCase() || 'sandbox'
-
-    if (!apiLoginId || !transactionKey) {
-      console.error('Missing Authorize.net credentials')
-
-      return NextResponse.json(
-        { error: 'Payment processing is not configured' },
-        { status: 500 },
-      )
-    }
-
-    const production = environment === 'production'
-
-    const apiUrl = production
-      ? 'https://api.authorize.net/xml/v1/request.api'
-      : 'https://apitest.authorize.net/xml/v1/request.api'
-
-    const hostedFormUrl = production
-      ? 'https://accept.authorize.net/payment/payment'
-      : 'https://test.authorize.net/payment/payment'
-
-    const siteUrl = (
-      process.env.SITE_URL || new URL(request.url).origin
-    ).replace(/\/$/, '')
-
-    const referenceId = `SC${Date.now().toString().slice(-14)}`
-    const invoiceNumber = `SENT-${Date.now().toString().slice(-12)}`
-
-    const authorizeNetRequest = {
-      getHostedPaymentPageRequest: {
-        merchantAuthentication: {
-          name: apiLoginId,
-          transactionKey,
-        },
-
-        refId: referenceId,
-
-        transactionRequest: {
-          transactionType: 'authCaptureTransaction',
-          amount: '25.00',
-
-          order: {
-            invoiceNumber,
-            description: 'SentientOS AR Glasses Founding Pre-Order Deposit',
-          },
-
-          customer: {
-            email,
-          },
-
-          billTo: {
-            firstName,
-            lastName,
-            phoneNumber: phone,
-          },
-        },
-
-        hostedPaymentSettings: {
-          setting: [
-            {
-              settingName: 'hostedPaymentReturnOptions',
-              settingValue: JSON.stringify({
-                showReceipt: true,
-                url: `${siteUrl}/?payment=success&reference=${encodeURIComponent(referenceId)}#preorder`,
-                urlText: 'Return to SentientOS',
-                cancelUrl: `${siteUrl}/?payment=cancelled#preorder`,
-                cancelUrlText: 'Cancel',
-              }),
-            },
-            {
-              settingName: 'hostedPaymentButtonOptions',
-              settingValue: JSON.stringify({
-                text: 'Pay $25 Deposit',
-              }),
-            },
-            {
-              settingName: 'hostedPaymentStyleOptions',
-              settingValue: JSON.stringify({
-                bgColor: '#d5ad53',
-              }),
-            },
-            {
-              settingName: 'hostedPaymentPaymentOptions',
-              settingValue: JSON.stringify({
-                cardCodeRequired: true,
-                showCreditCard: true,
-                showBankAccount: false,
-              }),
-            },
-            {
-              settingName: 'hostedPaymentShippingAddressOptions',
-              settingValue: JSON.stringify({
-                show: false,
-                required: false,
-              }),
-            },
-            {
-              settingName: 'hostedPaymentBillingAddressOptions',
-              settingValue: JSON.stringify({
-                show: true,
-                required: false,
-              }),
-            },
-            {
-              settingName: 'hostedPaymentCustomerOptions',
-              settingValue: JSON.stringify({
-                showEmail: false,
-                requiredEmail: false,
-                addPaymentProfile: false,
-              }),
-            },
-            {
-              settingName: 'hostedPaymentOrderOptions',
-              settingValue: JSON.stringify({
-                show: true,
-                merchantName: 'Sentient Connect',
-              }),
-            },
-          ],
-        },
-      },
-    }
-
-    const authorizeNetResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(authorizeNetRequest),
-      cache: 'no-store',
-    })
-
-    const rawResponse = await authorizeNetResponse.text()
-
-    let paymentData: AuthorizeNetResponse
+    const formData = new FormData(event.currentTarget)
+    const payload = Object.fromEntries(formData.entries())
 
     try {
-      paymentData = JSON.parse(
-        rawResponse.replace(/^\uFEFF/, ''),
-      ) as AuthorizeNetResponse
-    } catch {
-      console.error('Invalid Authorize.net response format')
-
-      return NextResponse.json(
-        { error: 'Invalid response from payment processor' },
-        { status: 502 },
-      )
-    }
-
-    const paymentError = paymentData.messages?.message
-      ?.map((item) => item.text)
-      .filter(Boolean)
-      .join('; ')
-
-    if (
-      !authorizeNetResponse.ok ||
-      paymentData.messages?.resultCode !== 'Ok' ||
-      !paymentData.token
-    ) {
-      console.error('Authorize.net token error:', paymentError)
-
-      return NextResponse.json(
-        {
-          error:
-            paymentError ||
-            'Unable to create the secure payment checkout',
+      const response = await fetch('/api/reserve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        { status: 502 },
+        body: JSON.stringify(payload),
+      })
+
+      const data = (await response.json()) as CheckoutResponse
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to continue')
+      }
+
+      if (!data.token || !data.hostedFormUrl) {
+        throw new Error(
+          'Secure checkout could not be created. Please try again.',
+        )
+      }
+
+      setStatus('ready')
+      setMessage('Opening Authorize.net secure checkout…')
+
+      const checkoutForm = document.createElement('form')
+
+      checkoutForm.method = 'POST'
+      checkoutForm.action = data.hostedFormUrl
+      checkoutForm.target = '_self'
+      checkoutForm.style.display = 'none'
+
+      const tokenInput = document.createElement('input')
+
+      tokenInput.type = 'hidden'
+      tokenInput.name = 'token'
+      tokenInput.value = data.token
+
+      checkoutForm.appendChild(tokenInput)
+      document.body.appendChild(checkoutForm)
+      checkoutForm.submit()
+    } catch (error) {
+      setStatus('error')
+
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Unable to continue. Please try again.',
       )
     }
-
-    const webhook = process.env.RESERVATION_WEBHOOK_URL
-
-    if (webhook) {
-      try {
-        await fetch(webhook, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            firstName,
-            lastName,
-            email,
-            phone,
-            terms,
-            referenceId,
-            invoiceNumber,
-            amount: 25,
-            paymentStatus: 'checkout_created',
-            source: 'sentientos-ar-preorder',
-            createdAt: new Date().toISOString(),
-          }),
-        })
-      } catch (error) {
-        console.error('Reservation webhook failed:', error)
-      }
-    }
-
-    return NextResponse.json({
-      ok: true,
-      token: paymentData.token,
-      hostedFormUrl,
-      referenceId,
-    })
-  } catch (error) {
-    console.error('Reserve route error:', error)
-
-    return NextResponse.json(
-      { error: 'Invalid request' },
-      { status: 400 },
-    )
   }
+
+  return (
+    <section
+      id="preorder"
+      className="relative overflow-hidden border-y border-[#d5ad53]/15 py-24 md:py-32"
+    >
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,rgba(213,173,83,.13),transparent_50%),#030302]"
+      />
+
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid overflow-hidden rounded-[2rem] border border-[#d5ad53]/25 bg-black/80 shadow-[0_40px_120px_rgba(0,0,0,.7)] lg:grid-cols-[.9fr_1.1fr]">
+          <div className="border-b border-white/[0.08] p-7 sm:p-10 lg:border-b-0 lg:border-r">
+            <p className="text-xs font-semibold uppercase tracking-[.26em] text-[#d5ad53]">
+              Founding Pre-Order Access
+            </p>
+
+            <h2 className="mt-5 font-display text-4xl font-semibold leading-tight text-white sm:text-5xl">
+              Become a Founding SentientOS™ User
+            </h2>
+
+            <div className="mt-8 flex items-end gap-3">
+              <span className="font-display text-7xl font-semibold text-gold-gradient">
+                $25
+              </span>
+
+              <span className="pb-2 text-sm uppercase tracking-[.18em] text-white/40">
+                today
+              </span>
+            </div>
+
+            <ul className="mt-8 space-y-4">
+              {[
+                'Reserve priority pre-order access',
+                '3 months of AURA Genesis™ free after activation',
+                '$19.99/month after the free period',
+                '25% off the final retail price',
+                'Product development and launch updates',
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="flex gap-3 text-sm text-white/65"
+                >
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#d5ad53]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4 text-xs leading-6 text-white/40">
+              The anticipated retail price is approximately $399 and is
+              subject to change. The $25 payment is governed by the final
+              pre-order terms shown at checkout.
+            </div>
+          </div>
+
+          <form onSubmit={submit} className="p-7 sm:p-10">
+            <div className="flex items-center gap-2 text-sm text-white/55">
+              <LockKeyhole className="h-4 w-4 text-[#d5ad53]" />
+              Secure Authorize.net checkout
+            </div>
+
+            <div className="mt-7 grid gap-5 sm:grid-cols-2">
+              <label className="text-sm text-white/55">
+                First name
+
+                <input
+                  required
+                  name="firstName"
+                  autoComplete="given-name"
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white outline-none transition placeholder:text-white/20 focus:border-[#d5ad53]/60"
+                />
+              </label>
+
+              <label className="text-sm text-white/55">
+                Last name
+
+                <input
+                  required
+                  name="lastName"
+                  autoComplete="family-name"
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white outline-none transition focus:border-[#d5ad53]/60"
+                />
+              </label>
+
+              <label className="text-sm text-white/55 sm:col-span-2">
+                Email
+
+                <input
+                  required
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white outline-none transition focus:border-[#d5ad53]/60"
+                />
+              </label>
+
+              <label className="text-sm text-white/55 sm:col-span-2">
+                Mobile phone
+
+                <input
+                  required
+                  type="tel"
+                  name="phone"
+                  autoComplete="tel"
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white outline-none transition focus:border-[#d5ad53]/60"
+                />
+              </label>
+            </div>
+
+            <label className="mt-5 flex items-start gap-3 text-xs leading-5 text-white/40">
+              <input
+                required
+                type="checkbox"
+                name="terms"
+                value="accepted"
+                className="mt-1 accent-[#d5ad53]"
+              />
+
+              <span>
+                I agree to the pre-order terms and consent to receive
+                reservation and product-launch updates.
+              </span>
+            </label>
+
+            <button
+              disabled={status === 'submitting' || status === 'ready'}
+              type="submit"
+              className="mt-7 inline-flex min-h-14 w-full items-center justify-center rounded-full border border-[#f1d785]/70 bg-[linear-gradient(135deg,#efd27b,#b87a1c)] px-6 font-bold text-black transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {status === 'submitting' || status === 'ready'
+                ? 'Opening Secure Checkout…'
+                : 'Reserve My Glasses for $25'}
+            </button>
+
+            <p className="mt-4 text-center text-xs text-white/35">
+              One-time holding deposit · Subscription begins after the
+              included free period and eligible product activation
+            </p>
+
+            {message && (
+              <div
+                className={`mt-5 rounded-xl border p-4 text-sm leading-6 ${
+                  status === 'error'
+                    ? 'border-red-400/20 bg-red-400/5 text-red-200'
+                    : 'border-[#d5ad53]/20 bg-[#d5ad53]/5 text-white/60'
+                }`}
+              >
+                {message}
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
+    </section>
+  )
 }
