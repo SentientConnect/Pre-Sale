@@ -21,6 +21,16 @@ type AuthorizeNetResponse = {
 
 export async function POST(request: Request) {
   try {
+    const origin = request.headers.get('origin')
+    const siteOrigin = new URL(request.url).origin
+
+    if (!origin || origin !== siteOrigin) {
+      return NextResponse.json(
+        { error: 'Origin denied' },
+        { status: 403 },
+      )
+    }
+
     const body = (await request.json()) as ReserveRequest
 
     const firstName = String(body.firstName || '').trim()
@@ -43,14 +53,14 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!email) {
+    if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
-        { error: 'Missing email' },
+        { error: 'Invalid email' },
         { status: 400 },
       )
     }
 
-    if (!phone) {
+    if (!phone || phone.length > 32) {
       return NextResponse.json(
         { error: 'Missing phone' },
         { status: 400 },
@@ -166,7 +176,7 @@ export async function POST(request: Request) {
             {
               settingName: 'hostedPaymentSecurityOptions',
               settingValue: JSON.stringify({
-                captcha: false,
+                captcha: true,
               }),
             },
             {
@@ -224,10 +234,7 @@ export async function POST(request: Request) {
         rawResponse.replace(/^\uFEFF/, ''),
       ) as AuthorizeNetResponse
     } catch {
-      console.error(
-        'Invalid Authorize.net response:',
-        rawResponse,
-      )
+      console.error('Invalid response from payment processor')
 
       return NextResponse.json(
         { error: 'Invalid response from payment processor' },
