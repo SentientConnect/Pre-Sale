@@ -11,13 +11,9 @@ type Props = Record<string, string | number | boolean | undefined>
 export function track(event: AnalyticsEvent, props?: Props) {
   if (typeof window === 'undefined') return
 
-  const w = window as unknown as {
-    va?: (action: string, event: string, props?: Props) => void
-  }
-
-  try {
-    w.va?.('event', event, props)
-  } catch {
-    // Analytics must never interrupt conversion flow.
-  }
+  window.dispatchEvent(
+    new CustomEvent('sentient:analytics', {
+      detail: { event, props },
+    }),
+  )
 }
